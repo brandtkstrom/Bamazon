@@ -36,7 +36,10 @@ function connectToDb() {
                 console.log('\nInventory:\n');
 
                 const products = data.map(i => new Product(i));
-                resolve(products);
+                resolve({
+                    list: products,
+                    data: data
+                });
             });
         });
     });
@@ -61,63 +64,72 @@ async function printOptions() {
 }
 
 function processOrderRequest(choices, inventory) {
-    const product = inventory.find(item => item.id === choices.productId);
+    const item = inventory.find(item => item.item_id === choices.productId);
     // Verify product selection is valid
-    if (!product) {
+    if (!item) {
         return {
             success: false,
             message: `${choices.productId} is an invalid product. Try again.`
         };
     }
     // Verify enough quantity in stock
-    if (product.stock < choices.productQty) {
+    if (item.stock_quantity < choices.productQty) {
         return {
             success: false,
-            message: `Insufficient quantity! Only ${product.stock} available.`
+            message: `Insufficient quantity! Only ${
+                item.stock_quantity
+            } available.`
         };
     }
     // Calculate total cost
-    const total = product.price * choices.productQty;
+    const total = item.price * choices.productQty;
 
     return {
         success: true,
-        message: `Processing order: ${product.name} x${choices.productQty}...`,
-        product: product,
-        newQty: product.stock - choices.productQty,
-        total: total
+        message: `\nProcessing order - Product: ${item.product_name}, Qty: ${
+            choices.productQty
+        }`,
+        product: new Product(item),
+        newQty: item.stock_quantity - choices.productQty,
+        total: `$${total.toFixed(2)}`
     };
 }
 
 async function run() {
     try {
         // Connect to DB and get inventory
-        const data = await connectToDb();
+        const products = await connectToDb();
         // Log current inventory
-        console.table(data);
+        console.table(products.list);
 
         let selectingProduct = true;
         while (selectingProduct) {
             // Prompt user for product & qty to purchase
             const choices = await printOptions();
-            console.log(choices);
 
             // Determine if purchase option is valid
-            const result = processOrderRequest(choices, data);
+            const result = processOrderRequest(choices, products.data);
+            console.log(result.message);
+
             if (!result.success) {
                 continue;
             }
 
-            console.log(result.message);
             selectingProduct = false;
 
+            // Update product stock quantity to complete order
             DB.query(
                 'UPDATE products SET ? WHERE ?',
-                [{ stock_quantity: newQty }, { item_id: result.product.id }],
+                [
+                    { stock_quantity: result.newQty },
+                    { item_id: result.product.id }
+                ],
                 err => {
                     if (err) {
                         throw err;
                     }
-                    console.log(`Order complete! Total cost: ${result.total}`);
+                    console.log(`\nOrder complete! Total cost: ${result.total}`);
+                    process.exit();
                 }
             );
         }
