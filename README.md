@@ -1,6 +1,6 @@
 # **Bamazon Store** :shopping_cart:
 
-### Bamazon is a simple CLI Node app that allows you to "purchase" one or more items from a mysql database. See usage details and examples below.
+### Bamazon is a simple CLI app that allows you to "purchase" one or more items using Node and a mysql database. See usage details and examples below.
 
 ## **Requirements**
 
