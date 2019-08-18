@@ -6,14 +6,14 @@
 
 #### This app requires a connection to a mysql database with the following schema:
 
-CREATE TABLE `products` (
-  `item_id` int(11) NOT NULL AUTO_INCREMENT,
-  `product_name` varchar(50) NOT NULL,
-  `department_name` varchar(50) NOT NULL,
-  `price` float(10,2) NOT NULL,
-  `stock_quantity` int(11) NOT NULL,
-  PRIMARY KEY (`item_id`)
-)
+> CREATE TABLE `products` (
+>  `item_id` int(11) NOT NULL AUTO_INCREMENT,
+>  `product_name` varchar(50) NOT NULL,
+>  `department_name` varchar(50) NOT NULL,
+>  `price` float(10,2) NOT NULL,
+>  `stock_quantity` int(11) NOT NULL,
+>  PRIMARY KEY (`item_id`)
+>)
 
 ## **Usage**
 
