@@ -8,9 +8,13 @@
 
 ##### Table: products
 
-|Column    | Data Type    |
-| -------- | ------------ |
-|item_id   | int*         | 
+| Column          | Data Type   |
+| --------------- | ----------- |
+| item_id         | int*        | 
+| product_name    | varchar(50) |
+| department_name | varchar(50) |
+| price           | float       |
+| stock_quantity  | int         |
 
 CREATE TABLE `products` (
   `item_id` int(11) NOT NULL AUTO_INCREMENT,
