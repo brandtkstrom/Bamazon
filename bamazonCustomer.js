@@ -74,7 +74,7 @@ function processOrderRequest(choices, inventory) {
         return {
             success: false,
             message: `Insufficient quantity! Only ${product.stock} available.`
-        }
+        };
     }
     // Calculate total cost
     const total = product.price * choices.productQty;
@@ -82,6 +82,8 @@ function processOrderRequest(choices, inventory) {
     return {
         success: true,
         message: `Processing order: ${product.name} x${choices.productQty}...`,
+        product: product,
+        newQty: product.stock - choices.productQty,
         total: total
     };
 }
@@ -107,6 +109,17 @@ async function run() {
 
             console.log(result.message);
             selectingProduct = false;
+
+            DB.query(
+                'UPDATE products SET ? WHERE ?',
+                [{ stock_quantity: newQty }, { item_id: result.product.id }],
+                err => {
+                    if (err) {
+                        throw err;
+                    }
+                    console.log(`Order complete! Total cost: ${result.total}`);
+                }
+            );
         }
     } catch (err) {
         throw err;
