@@ -13,7 +13,7 @@ const DB = mysql.createConnection(dbConfig);
 
 function Product(data) {
     this.id = parseInt(data.item_id);
-    this.product = data.product_name;
+    this.name = data.product_name;
     this.department = data.department_name;
     this.price = '$' + parseFloat(data.price).toFixed(2);
     this.stock = data.stock_quantity;
@@ -70,11 +70,19 @@ function processOrderRequest(choices, inventory) {
         };
     }
     // Verify enough quantity in stock
+    if (product.stock < choices.productQty) {
+        return {
+            success: false,
+            message: `Insufficient quantity! Only ${product.stock} available.`
+        }
+    }
+    // Calculate total cost
     const total = product.price * choices.productQty;
 
     return {
         success: true,
-        message: ``
+        message: `Processing order: ${product.name} x${choices.productQty}...`,
+        total: total
     };
 }
 
@@ -85,8 +93,8 @@ async function run() {
         // Log current inventory
         console.table(data);
 
-        let running = true;
-        while (running) {
+        let selectingProduct = true;
+        while (selectingProduct) {
             // Prompt user for product & qty to purchase
             const choices = await printOptions();
             console.log(choices);
@@ -94,9 +102,11 @@ async function run() {
             // Determine if purchase option is valid
             const result = processOrderRequest(choices, data);
             if (!result.success) {
-                console.log(result.message);
                 continue;
             }
+
+            console.log(result.message);
+            selectingProduct = false;
         }
     } catch (err) {
         throw err;
